@@ -209,13 +209,29 @@ body {
   gap: 12px;
 }
 
+.color-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.color-row label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  min-width: 50px;
+}
+
 .color-picker input[type="color"] {
   width: 50px;
   height: 30px;
   border: none;
   border-radius: var(--border-radius);
   cursor: pointer;
-  margin-right: 10px;
+}
+
+.color-picker input[type="checkbox"] {
+  cursor: pointer;
 }
 
 .color-swatches {
@@ -323,6 +339,18 @@ body {
 
 .layer-btn.active {
   background: rgba(0, 123, 255, 0.2);
+}
+
+.layer-controls-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.layer-move-buttons {
+  display: flex;
+  gap: 4px;
 }
 
 /* Main Canvas Area */

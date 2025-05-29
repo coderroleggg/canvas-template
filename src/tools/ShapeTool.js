@@ -8,6 +8,7 @@ export class ShapeTool {
       stroke: '#000000',
       strokeWidth: 2,
       opacity: 1.0,
+      fillEnabled: true,
       ...options
     };
     
@@ -101,7 +102,7 @@ export class ShapeTool {
           top: y,
           width: 0,
           height: 0,
-          fill: this.options.fill,
+          fill: this.options.fillEnabled ? this.options.fill : 'transparent',
           stroke: this.options.stroke,
           strokeWidth: this.options.strokeWidth,
           opacity: this.options.opacity,
@@ -113,7 +114,7 @@ export class ShapeTool {
           left: x,
           top: y,
           radius: 0,
-          fill: this.options.fill,
+          fill: this.options.fillEnabled ? this.options.fill : 'transparent',
           stroke: this.options.stroke,
           strokeWidth: this.options.strokeWidth,
           opacity: this.options.opacity,
@@ -199,6 +200,10 @@ export class ShapeTool {
   setFill(color) {
     this.options.fill = color;
   }
+  
+  setFillEnabled(enabled) {
+    this.options.fillEnabled = enabled;
+  }
 
   setStroke(color) {
     this.options.stroke = color;
@@ -230,5 +235,9 @@ export class ShapeTool {
 
   getOpacity() {
     return this.options.opacity;
+  }
+  
+  getFillEnabled() {
+    return this.options.fillEnabled;
   }
 } 

@@ -102,6 +102,10 @@ export class Canvas extends EventEmitter {
 
     // Path created event for drawing tools
     this.canvas.on('path:created', (e) => {
+      // Handle eraser mode
+      if (this.canvas.freeDrawingBrush && this.canvas.freeDrawingBrush._isEraser) {
+        e.path.globalCompositeOperation = 'destination-out';
+      }
       this.emit('pathCreated', e.path);
     });
   }

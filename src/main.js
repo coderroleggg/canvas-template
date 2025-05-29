@@ -87,17 +87,19 @@ class CanvasApp {
     // Register shape tools
     const rectangleTool = new ShapeTool({
       shapeType: 'rectangle',
-      fill: 'transparent',
+      fill: '#ffffff',
       stroke: '#000000',
-      strokeWidth: 2
+      strokeWidth: 2,
+      fillEnabled: true
     });
     this.tools.set('rectangle', rectangleTool);
 
     const circleTool = new ShapeTool({
       shapeType: 'circle',
-      fill: 'transparent',
+      fill: '#ffffff',
       stroke: '#000000',
-      strokeWidth: 2
+      strokeWidth: 2,
+      fillEnabled: true
     });
     this.tools.set('circle', circleTool);
 
@@ -127,20 +129,35 @@ class CanvasApp {
     });
 
     // Color pickers
-    const primaryColor = document.getElementById('color-primary');
-    if (primaryColor) {
-      primaryColor.addEventListener('change', (e) => {
-        this.updateToolColor(e.target.value);
+    const strokeColor = document.getElementById('color-stroke');
+    const fillColor = document.getElementById('color-fill');
+    const fillEnabled = document.getElementById('fill-enabled');
+    
+    if (strokeColor) {
+      strokeColor.addEventListener('change', (e) => {
+        this.updateStrokeColor(e.target.value);
+      });
+    }
+    
+    if (fillColor) {
+      fillColor.addEventListener('change', (e) => {
+        this.updateFillColor(e.target.value);
+      });
+    }
+    
+    if (fillEnabled) {
+      fillEnabled.addEventListener('change', (e) => {
+        this.updateFillEnabled(e.target.checked);
       });
     }
 
-    // Color swatches
+    // Color swatches - when clicked, update stroke color
     document.querySelectorAll('.color-swatch').forEach(swatch => {
       swatch.addEventListener('click', (e) => {
         const color = e.target.dataset.color;
-        if (primaryColor) {
-          primaryColor.value = color;
-          this.updateToolColor(color);
+        if (strokeColor) {
+          strokeColor.value = color;
+          this.updateStrokeColor(color);
         }
       });
     });
@@ -219,6 +236,21 @@ class CanvasApp {
         this.layerManager.addLayer();
       });
     }
+    
+    // Layer move buttons
+    const layerUpBtn = document.getElementById('layer-up');
+    if (layerUpBtn) {
+      layerUpBtn.addEventListener('click', () => {
+        this.layerManager.bringForward();
+      });
+    }
+    
+    const layerDownBtn = document.getElementById('layer-down');
+    if (layerDownBtn) {
+      layerDownBtn.addEventListener('click', () => {
+        this.layerManager.sendBackward();
+      });
+    }
 
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
@@ -293,20 +325,34 @@ class CanvasApp {
     }
   }
 
-  updateToolColor(color) {
+  updateStrokeColor(color) {
     const currentTool = this.canvas.getTool();
+    // Update brush/pen color
     if (currentTool && currentTool.setColor) {
       currentTool.setColor(color);
     }
-    
-    // Also update shape tools
+    // Update shape stroke
     if (currentTool && currentTool.setStroke) {
       currentTool.setStroke(color);
     }
-    
-    // Update text tool
-    if (currentTool && currentTool.setFill) {
+    // Update text color
+    if (currentTool && currentTool.setFill && currentTool.constructor.name === 'TextTool') {
       currentTool.setFill(color);
+    }
+  }
+  
+  updateFillColor(color) {
+    const currentTool = this.canvas.getTool();
+    // Update shape fill
+    if (currentTool && currentTool.setFill && currentTool.constructor.name === 'ShapeTool') {
+      currentTool.setFill(color);
+    }
+  }
+  
+  updateFillEnabled(enabled) {
+    const currentTool = this.canvas.getTool();
+    if (currentTool && currentTool.setFillEnabled) {
+      currentTool.setFillEnabled(enabled);
     }
   }
 

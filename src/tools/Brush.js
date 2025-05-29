@@ -48,14 +48,12 @@ export class Brush {
         this.brush = new fabric.SprayBrush(this.canvas.canvas);
         break;
       case 'eraser':
-        // Try to use EraserBrush if available, otherwise use PencilBrush with eraser mode
-        if (fabric.EraserBrush) {
-          this.brush = new fabric.EraserBrush(this.canvas.canvas);
-        } else {
-          // Fallback: use PencilBrush with globalCompositeOperation
-          this.brush = new fabric.PencilBrush(this.canvas.canvas);
-          this.brush.globalCompositeOperation = 'destination-out';
-        }
+        // Use PencilBrush for eraser and handle composite operation
+        this.brush = new fabric.PencilBrush(this.canvas.canvas);
+        // Set white color for eraser to work with globalCompositeOperation
+        this.brush.color = 'white';
+        // Store that this is an eraser type
+        this.brush._isEraser = true;
         break;
       case 'pencil':
       default:
@@ -69,8 +67,10 @@ export class Brush {
     
     this.brush.width = this.options.size;
     
-    // For eraser, don't set color
+    // For eraser, ensure it stays white
     if (this.options.type === 'eraser') {
+      this.brush.color = 'white';
+      this.brush._isEraser = true;
       return;
     }
     

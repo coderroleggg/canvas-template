@@ -44,8 +44,15 @@
             <div class="tool-group">
                 <h3>Colors</h3>
                 <div class="color-picker">
-                    <input type="color" id="color-primary" value="#000000" title="Primary Color">
-                    <input type="color" id="color-secondary" value="#ffffff" title="Secondary Color">
+                    <div class="color-row">
+                        <label for="color-stroke">Stroke:</label>
+                        <input type="color" id="color-stroke" value="#000000" title="Stroke Color">
+                    </div>
+                    <div class="color-row">
+                        <label for="color-fill">Fill:</label>
+                        <input type="color" id="color-fill" value="#ffffff" title="Fill Color">
+                        <input type="checkbox" id="fill-enabled" checked title="Enable Fill">
+                    </div>
                     <div class="color-swatches">
                         <div class="color-swatch" style="background: #000000" data-color="#000000"></div>
                         <div class="color-swatch" style="background: #ffffff" data-color="#ffffff"></div>
@@ -84,7 +91,13 @@
                         </div>
                     </div>
                 </div>
-                <button class="btn btn-small" id="add-layer">+ Add Layer</button>
+                <div class="layer-controls-bottom">
+                    <button class="btn btn-small" id="add-layer">+ Add Layer</button>
+                    <div class="layer-move-buttons">
+                        <button class="btn btn-small" id="layer-up" title="Move Layer Up">↑</button>
+                        <button class="btn btn-small" id="layer-down" title="Move Layer Down">↓</button>
+                    </div>
+                </div>
             </div>
         </div>
 
