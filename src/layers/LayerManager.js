@@ -89,6 +89,42 @@ export class LayerManager {
     return true;
   }
 
+  // Move active layer to front (top)
+  bringToFront() {
+    const activeIndex = this.activeLayerIndex;
+    if (activeIndex < this.layers.length - 1) {
+      return this.moveLayer(activeIndex, this.layers.length - 1);
+    }
+    return false;
+  }
+
+  // Move active layer forward (up one position)
+  bringForward() {
+    const activeIndex = this.activeLayerIndex;
+    if (activeIndex < this.layers.length - 1) {
+      return this.moveLayer(activeIndex, activeIndex + 1);
+    }
+    return false;
+  }
+
+  // Move active layer backward (down one position)
+  sendBackward() {
+    const activeIndex = this.activeLayerIndex;
+    if (activeIndex > 0) {
+      return this.moveLayer(activeIndex, activeIndex - 1);
+    }
+    return false;
+  }
+
+  // Move active layer to back (bottom)
+  sendToBack() {
+    const activeIndex = this.activeLayerIndex;
+    if (activeIndex > 0) {
+      return this.moveLayer(activeIndex, 0);
+    }
+    return false;
+  }
+
   duplicateLayer(index) {
     const layer = this.getLayer(index);
     if (!layer) return null;

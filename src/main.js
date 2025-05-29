@@ -1,4 +1,5 @@
 import { Canvas } from './core/Canvas.js';
+import { LayerManager } from './layers/LayerManager.js';
 import { Brush } from './tools/Brush.js';
 import { SelectTool } from './tools/SelectTool.js';
 import { ShapeTool } from './tools/ShapeTool.js';
@@ -7,6 +8,7 @@ import { TextTool } from './tools/TextTool.js';
 class CanvasApp {
   constructor() {
     this.canvas = null;
+    this.layerManager = null;
     this.tools = new Map();
     this.currentTool = null;
     
@@ -25,6 +27,9 @@ class CanvasApp {
         height: 600,
         backgroundColor: '#ffffff'
       });
+      
+      // Initialize layer manager
+      this.layerManager = new LayerManager(this.canvas);
       
       // Register tools
       this.registerTools();
@@ -182,28 +187,36 @@ class CanvasApp {
     const bringToFrontBtn = document.getElementById('bring-to-front');
     if (bringToFrontBtn) {
       bringToFrontBtn.addEventListener('click', () => {
-        this.canvas.bringToFront();
+        this.layerManager.bringToFront();
       });
     }
 
     const bringForwardBtn = document.getElementById('bring-forward');
     if (bringForwardBtn) {
       bringForwardBtn.addEventListener('click', () => {
-        this.canvas.bringForward();
+        this.layerManager.bringForward();
       });
     }
 
     const sendBackwardBtn = document.getElementById('send-backward');
     if (sendBackwardBtn) {
       sendBackwardBtn.addEventListener('click', () => {
-        this.canvas.sendBackwards();
+        this.layerManager.sendBackward();
       });
     }
 
     const sendToBackBtn = document.getElementById('send-to-back');
     if (sendToBackBtn) {
       sendToBackBtn.addEventListener('click', () => {
-        this.canvas.sendToBack();
+        this.layerManager.sendToBack();
+      });
+    }
+
+    // Add Layer button
+    const addLayerBtn = document.getElementById('add-layer');
+    if (addLayerBtn) {
+      addLayerBtn.addEventListener('click', () => {
+        this.layerManager.addLayer();
       });
     }
 
