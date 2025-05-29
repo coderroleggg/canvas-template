@@ -37,18 +37,26 @@ export class TextTool {
   }
 
   bindEvents() {
-    if (!this.canvas) return;
+    if (!this.canvas || !this.canvas.canvas) {
+      console.error('Canvas not available for event binding');
+      return;
+    }
     
     this.canvas.canvas.on('mouse:down', this.onMouseDown.bind(this));
   }
 
   unbindEvents() {
-    if (!this.canvas) return;
+    if (!this.canvas || !this.canvas.canvas) return;
     
     this.canvas.canvas.off('mouse:down', this.onMouseDown.bind(this));
   }
 
   onMouseDown(event) {
+    if (!this.canvas || !this.canvas.canvas) {
+      console.error('Canvas not available for text creation');
+      return;
+    }
+    
     const pointer = this.canvas.canvas.getPointer(event.e);
     this.createText(pointer.x, pointer.y);
   }
@@ -118,7 +126,7 @@ export class TextTool {
   }
 
   updateSelectedText(properties) {
-    if (!this.canvas) return;
+    if (!this.canvas || !this.canvas.canvas) return;
     
     const activeObject = this.canvas.getActiveObject();
     if (activeObject && (activeObject.type === 'text' || activeObject.type === 'i-text' || activeObject.type === 'textbox')) {

@@ -47,18 +47,25 @@ export class Canvas extends EventEmitter {
       container.appendChild(this.canvasElement);
     }
 
-    // Initialize Fabric.js canvas
-    this.canvas = new fabric.Canvas(this.canvasElement, {
-      width: this.options.width,
-      height: this.options.height,
-      backgroundColor: this.options.backgroundColor,
-      selection: false, // Disable group selection by default
-      preserveObjectStacking: true
-    });
+    try {
+      // Initialize Fabric.js canvas
+      this.canvas = new fabric.Canvas(this.canvasElement, {
+        width: this.options.width,
+        height: this.options.height,
+        backgroundColor: this.options.backgroundColor,
+        selection: false, // Disable group selection by default
+        preserveObjectStacking: true
+      });
 
-    // Store dimensions
-    this.width = this.options.width;
-    this.height = this.options.height;
+      // Store dimensions
+      this.width = this.options.width;
+      this.height = this.options.height;
+      
+      console.log('✅ Fabric.js canvas initialized successfully');
+    } catch (error) {
+      console.error('❌ Failed to initialize Fabric.js canvas:', error);
+      throw error;
+    }
   }
 
   setupEventListeners() {
@@ -139,17 +146,23 @@ export class Canvas extends EventEmitter {
   }
 
   setTool(tool) {
-    if (this.currentTool) {
-      this.currentTool.deactivate();
+    try {
+      if (this.currentTool) {
+        this.currentTool.deactivate();
+      }
+      
+      this.currentTool = tool;
+      
+      if (tool) {
+        tool.activate(this);
+      }
+      
+      this.emit('toolChanged', tool);
+    } catch (error) {
+      console.error('❌ Failed to set tool:', error);
+      // Reset to null tool if activation fails
+      this.currentTool = null;
     }
-    
-    this.currentTool = tool;
-    
-    if (tool) {
-      tool.activate(this);
-    }
-    
-    this.emit('toolChanged', tool);
   }
 
   getTool() {

@@ -38,7 +38,10 @@ export class ShapeTool {
   }
 
   bindEvents() {
-    if (!this.canvas) return;
+    if (!this.canvas || !this.canvas.canvas) {
+      console.error('Canvas not available for event binding');
+      return;
+    }
     
     this.canvas.canvas.on('mouse:down', this.onMouseDown.bind(this));
     this.canvas.canvas.on('mouse:move', this.onMouseMove.bind(this));
@@ -46,7 +49,7 @@ export class ShapeTool {
   }
 
   unbindEvents() {
-    if (!this.canvas) return;
+    if (!this.canvas || !this.canvas.canvas) return;
     
     this.canvas.canvas.off('mouse:down', this.onMouseDown.bind(this));
     this.canvas.canvas.off('mouse:move', this.onMouseMove.bind(this));
@@ -54,6 +57,11 @@ export class ShapeTool {
   }
 
   onMouseDown(event) {
+    if (!this.canvas || !this.canvas.canvas) {
+      console.error('Canvas not available for shape creation');
+      return;
+    }
+    
     this.isDrawing = true;
     this.startPoint = this.canvas.canvas.getPointer(event.e);
     
@@ -62,7 +70,7 @@ export class ShapeTool {
   }
 
   onMouseMove(event) {
-    if (!this.isDrawing || !this.currentShape) return;
+    if (!this.isDrawing || !this.currentShape || !this.canvas || !this.canvas.canvas) return;
     
     const pointer = this.canvas.canvas.getPointer(event.e);
     this.updateShape(pointer);
@@ -70,7 +78,7 @@ export class ShapeTool {
   }
 
   onMouseUp(event) {
-    if (!this.isDrawing) return;
+    if (!this.isDrawing || !this.canvas) return;
     
     this.isDrawing = false;
     

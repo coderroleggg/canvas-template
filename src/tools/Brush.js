@@ -38,12 +38,24 @@ export class Brush {
   }
 
   createBrush() {
+    if (!this.canvas || !this.canvas.canvas) {
+      console.error('Canvas not available for brush creation');
+      return;
+    }
+
     switch (this.options.type) {
       case 'spray':
         this.brush = new fabric.SprayBrush(this.canvas.canvas);
         break;
       case 'eraser':
-        this.brush = new fabric.EraserBrush(this.canvas.canvas);
+        // Try to use EraserBrush if available, otherwise use PencilBrush with eraser mode
+        if (fabric.EraserBrush) {
+          this.brush = new fabric.EraserBrush(this.canvas.canvas);
+        } else {
+          // Fallback: use PencilBrush with globalCompositeOperation
+          this.brush = new fabric.PencilBrush(this.canvas.canvas);
+          this.brush.globalCompositeOperation = 'destination-out';
+        }
         break;
       case 'pencil':
       default:
@@ -56,13 +68,24 @@ export class Brush {
     if (!this.brush) return;
     
     this.brush.width = this.options.size;
+    
+    // For eraser, don't set color
+    if (this.options.type === 'eraser') {
+      return;
+    }
+    
     this.brush.color = this.options.color;
     
     // Apply opacity to color if it's not an eraser
-    if (this.options.type !== 'eraser' && this.options.opacity < 1.0) {
-      const color = new fabric.Color(this.options.color);
-      color.setAlpha(this.options.opacity);
-      this.brush.color = color.toRgba();
+    if (this.options.opacity < 1.0) {
+      try {
+        const color = new fabric.Color(this.options.color);
+        color.setAlpha(this.options.opacity);
+        this.brush.color = color.toRgba();
+      } catch (error) {
+        console.warn('Failed to apply opacity to brush color:', error);
+        this.brush.color = this.options.color;
+      }
     }
   }
 
@@ -88,8 +111,10 @@ export class Brush {
     if (this.isActive && this.canvas) {
       // Recreate brush with new type
       this.createBrush();
-      this.canvas.canvas.freeDrawingBrush = this.brush;
-      this.updateBrush();
+      if (this.brush && this.canvas.canvas) {
+        this.canvas.canvas.freeDrawingBrush = this.brush;
+        this.updateBrush();
+      }
     }
   }
 
