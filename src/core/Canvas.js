@@ -223,13 +223,64 @@ export class Canvas extends EventEmitter {
 
   // Layer-like functionality using Fabric.js objects
   bringToFront(object) {
-    this.canvas.bringToFront(object);
-    this.canvas.renderAll();
+    if (!object) {
+      object = this.getActiveObject();
+    }
+    if (object) {
+      this.canvas.bringToFront(object);
+      this.canvas.renderAll();
+      this.emit('layerChanged', { action: 'bringToFront', object });
+    }
   }
 
   sendToBack(object) {
-    this.canvas.sendToBack(object);
-    this.canvas.renderAll();
+    if (!object) {
+      object = this.getActiveObject();
+    }
+    if (object) {
+      this.canvas.sendToBack(object);
+      this.canvas.renderAll();
+      this.emit('layerChanged', { action: 'sendToBack', object });
+    }
+  }
+
+  bringForward(object) {
+    if (!object) {
+      object = this.getActiveObject();
+    }
+    if (object) {
+      this.canvas.bringForward(object);
+      this.canvas.renderAll();
+      this.emit('layerChanged', { action: 'bringForward', object });
+    }
+  }
+
+  sendBackwards(object) {
+    if (!object) {
+      object = this.getActiveObject();
+    }
+    if (object) {
+      this.canvas.sendBackwards(object);
+      this.canvas.renderAll();
+      this.emit('layerChanged', { action: 'sendBackwards', object });
+    }
+  }
+
+  // Get object index (layer position)
+  getObjectIndex(object) {
+    return this.canvas.getObjects().indexOf(object);
+  }
+
+  // Move object to specific index
+  moveObjectToIndex(object, index) {
+    if (!object) {
+      object = this.getActiveObject();
+    }
+    if (object) {
+      this.canvas.moveTo(object, index);
+      this.canvas.renderAll();
+      this.emit('layerChanged', { action: 'moveToIndex', object, index });
+    }
   }
 
   // Export functionality

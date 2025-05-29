@@ -178,6 +178,35 @@ class CanvasApp {
       });
     }
 
+    // Layer control buttons
+    const bringToFrontBtn = document.getElementById('bring-to-front');
+    if (bringToFrontBtn) {
+      bringToFrontBtn.addEventListener('click', () => {
+        this.canvas.bringToFront();
+      });
+    }
+
+    const bringForwardBtn = document.getElementById('bring-forward');
+    if (bringForwardBtn) {
+      bringForwardBtn.addEventListener('click', () => {
+        this.canvas.bringForward();
+      });
+    }
+
+    const sendBackwardBtn = document.getElementById('send-backward');
+    if (sendBackwardBtn) {
+      sendBackwardBtn.addEventListener('click', () => {
+        this.canvas.sendBackwards();
+      });
+    }
+
+    const sendToBackBtn = document.getElementById('send-to-back');
+    if (sendToBackBtn) {
+      sendToBackBtn.addEventListener('click', () => {
+        this.canvas.sendToBack();
+      });
+    }
+
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
       this.handleKeyboardShortcuts(e);
