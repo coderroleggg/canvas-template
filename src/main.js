@@ -1,5 +1,5 @@
 import { Canvas } from './core/Canvas.js';
-import { LayerManager } from './layers/LayerManager.js';
+import { FabricLayerManager } from './layers/FabricLayerManager.js';
 import { Brush } from './tools/Brush.js';
 import { SelectTool } from './tools/SelectTool.js';
 import { ShapeTool } from './tools/ShapeTool.js';
@@ -29,7 +29,7 @@ class CanvasApp {
       });
       
       // Initialize layer manager
-      this.layerManager = new LayerManager(this.canvas);
+      this.layerManager = new FabricLayerManager(this.canvas);
       
       // Register tools
       this.registerTools();
