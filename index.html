@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D Canvas Template</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1 class="logo">🎨 Canvas Template</h1>
+                <nav class="nav">
+                    <button class="nav-btn active" data-example="drawing">Drawing App</button>
+                    <button class="nav-btn" data-example="game">Simple Game</button>
+                    <button class="nav-btn" data-example="animation">Animation Demo</button>
+                </nav>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-secondary" id="fullscreen-btn">⛶ Fullscreen</button>
+                <button class="btn btn-primary" id="export-btn">💾 Export</button>
+            </div>
+        </header>
+
+        <!-- Toolbar -->
+        <div class="toolbar" id="toolbar">
+            <div class="tool-group">
+                <h3>Tools</h3>
+                <button class="tool-btn active" data-tool="brush" title="Brush">🖌️</button>
+                <button class="tool-btn" data-tool="pen" title="Pen">✏️</button>
+                <button class="tool-btn" data-tool="eraser" title="Eraser">🧽</button>
+                <button class="tool-btn" data-tool="rectangle" title="Rectangle">⬜</button>
+                <button class="tool-btn" data-tool="circle" title="Circle">⭕</button>
+                <button class="tool-btn" data-tool="line" title="Line">📏</button>
+                <button class="tool-btn" data-tool="text" title="Text">📝</button>
+                <button class="tool-btn" data-tool="select" title="Select">👆</button>
+            </div>
+
+            <div class="tool-group">
+                <h3>Colors</h3>
+                <div class="color-picker">
+                    <input type="color" id="color-primary" value="#000000" title="Primary Color">
+                    <input type="color" id="color-secondary" value="#ffffff" title="Secondary Color">
+                    <div class="color-swatches">
+                        <div class="color-swatch" style="background: #000000" data-color="#000000"></div>
+                        <div class="color-swatch" style="background: #ffffff" data-color="#ffffff"></div>
+                        <div class="color-swatch" style="background: #ff0000" data-color="#ff0000"></div>
+                        <div class="color-swatch" style="background: #00ff00" data-color="#00ff00"></div>
+                        <div class="color-swatch" style="background: #0000ff" data-color="#0000ff"></div>
+                        <div class="color-swatch" style="background: #ffff00" data-color="#ffff00"></div>
+                        <div class="color-swatch" style="background: #ff00ff" data-color="#ff00ff"></div>
+                        <div class="color-swatch" style="background: #00ffff" data-color="#00ffff"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tool-group">
+                <h3>Settings</h3>
+                <div class="setting">
+                    <label for="brush-size">Size:</label>
+                    <input type="range" id="brush-size" min="1" max="50" value="5">
+                    <span id="brush-size-value">5</span>
+                </div>
+                <div class="setting">
+                    <label for="opacity">Opacity:</label>
+                    <input type="range" id="opacity" min="0" max="100" value="100">
+                    <span id="opacity-value">100%</span>
+                </div>
+            </div>
+
+            <div class="tool-group">
+                <h3>Layers</h3>
+                <div class="layers-panel" id="layers-panel">
+                    <div class="layer active" data-layer="0">
+                        <span class="layer-name">Background</span>
+                        <div class="layer-controls">
+                            <button class="layer-btn" title="Toggle Visibility">👁️</button>
+                            <button class="layer-btn" title="Lock Layer">🔒</button>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-small" id="add-layer">+ Add Layer</button>
+            </div>
+        </div>
+
+        <!-- Main Canvas Area -->
+        <main class="main-content">
+            <div class="canvas-container" id="canvas-container">
+                <canvas id="main-canvas"></canvas>
+                <div class="canvas-overlay" id="canvas-overlay">
+                    <!-- UI overlays, cursors, etc. -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Status Bar -->
+        <footer class="status-bar">
+            <div class="status-left">
+                <span id="cursor-position">Position: (0, 0)</span>
+                <span id="canvas-size">Canvas: 800 × 600</span>
+                <span id="zoom-level">Zoom: 100%</span>
+            </div>
+            <div class="status-right">
+                <span id="fps-counter">FPS: 60</span>
+                <span id="performance-info">Performance: Good</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h2>Loading Canvas Template...</h2>
+            <p>Initializing graphics engine</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="src/main.js"></script>
+</body>
+</html> 
