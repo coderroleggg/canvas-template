@@ -11,6 +11,9 @@ class CanvasApp {
     this.layerManager = null;
     this.tools = new Map();
     this.currentTool = null;
+    this.currentExample = 'drawing';
+    this.gameLoop = null;
+    this.animationFrame = null;
     
     this.init();
   }
@@ -42,6 +45,9 @@ class CanvasApp {
       
       // Start canvas
       this.canvas.start();
+      
+      // Initialize default example (drawing app)
+      this.initDrawingApp();
       
       // Hide loading screen
       this.hideLoading();
@@ -120,6 +126,14 @@ class CanvasApp {
   }
 
   setupUI() {
+    // Example navigation buttons
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const example = e.target.dataset.example;
+        this.switchExample(example);
+      });
+    });
+
     // Tool buttons
     document.querySelectorAll('.tool-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -496,6 +510,375 @@ class CanvasApp {
         `;
       }
     }
+  }
+
+  // Example switching functionality
+  switchExample(example) {
+    // Update navigation UI
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    
+    const selectedBtn = document.querySelector(`[data-example="${example}"]`);
+    if (selectedBtn) {
+      selectedBtn.classList.add('active');
+    }
+
+    // Stop any running loops
+    this.stopCurrentExample();
+
+    // Clear canvas
+    this.canvas.clear();
+
+    // Switch to new example
+    this.currentExample = example;
+    
+    switch (example) {
+      case 'drawing':
+        this.initDrawingApp();
+        break;
+      case 'game':
+        this.initSimpleGame();
+        break;
+      case 'animation':
+        this.initAnimationDemo();
+        break;
+    }
+  }
+
+  stopCurrentExample() {
+    // Stop game loop
+    if (this.gameLoop) {
+      clearInterval(this.gameLoop);
+      this.gameLoop = null;
+    }
+
+    // Stop animation frame
+    if (this.animationFrame) {
+      cancelAnimationFrame(this.animationFrame);
+      this.animationFrame = null;
+    }
+
+    // Call cleanup function if exists
+    if (this.gameCleanup) {
+      this.gameCleanup();
+      this.gameCleanup = null;
+    }
+  }
+
+  initDrawingApp() {
+    // Show toolbar for drawing app
+    const toolbar = document.getElementById('toolbar');
+    if (toolbar) {
+      toolbar.style.display = 'flex';
+    }
+    
+    // Set default tool
+    this.selectTool('brush');
+  }
+
+  initSimpleGame() {
+    // Hide toolbar for game
+    const toolbar = document.getElementById('toolbar');
+    if (toolbar) {
+      toolbar.style.display = 'none';
+    }
+
+    // Initialize simple game
+    this.setupSimpleGame();
+  }
+
+  initAnimationDemo() {
+    // Hide toolbar for animation
+    const toolbar = document.getElementById('toolbar');
+    if (toolbar) {
+      toolbar.style.display = 'none';
+    }
+
+    // Initialize animation demo
+    this.setupAnimationDemo();
+  }
+
+  setupSimpleGame() {
+    // Simple Pong-like game
+    const canvas = this.canvas.canvas;
+    
+    // Game state
+    const game = {
+      paddle: {
+        x: 50,
+        y: canvas.height / 2 - 50,
+        width: 15,
+        height: 100,
+        speed: 8
+      },
+      ball: {
+        x: canvas.width / 2,
+        y: canvas.height / 2,
+        radius: 10,
+        speedX: 5,
+        speedY: 3
+      },
+      score: 0,
+      isRunning: true
+    };
+
+    // Add instructions text
+    const instructionsText = new fabric.Text('Use W/S keys to move paddle\nKeep the ball in play!', {
+      left: canvas.width / 2,
+      top: 50,
+      originX: 'center',
+      fontSize: 20,
+      fill: '#666',
+      textAlign: 'center',
+      selectable: false
+    });
+    canvas.add(instructionsText);
+
+    // Add score text
+    const scoreText = new fabric.Text('Score: 0', {
+      left: canvas.width / 2,
+      top: 100,
+      originX: 'center',
+      fontSize: 24,
+      fill: '#333',
+      selectable: false
+    });
+    canvas.add(scoreText);
+
+    // Create paddle
+    const paddle = new fabric.Rect({
+      left: game.paddle.x,
+      top: game.paddle.y,
+      width: game.paddle.width,
+      height: game.paddle.height,
+      fill: '#2196F3',
+      selectable: false,
+      evented: false
+    });
+    canvas.add(paddle);
+
+    // Create ball
+    const ball = new fabric.Circle({
+      left: game.ball.x - game.ball.radius,
+      top: game.ball.y - game.ball.radius,
+      radius: game.ball.radius,
+      fill: '#FF5722',
+      selectable: false,
+      evented: false
+    });
+    canvas.add(ball);
+
+    // Render canvas
+    canvas.renderAll();
+
+    // Keyboard controls
+    const keys = {};
+    
+    const handleKeyDown = (e) => {
+      keys[e.key.toLowerCase()] = true;
+    };
+    
+    const handleKeyUp = (e) => {
+      keys[e.key.toLowerCase()] = false;
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+
+    // Game loop
+    this.gameLoop = setInterval(() => {
+      if (!game.isRunning) return;
+
+      // Move paddle
+      if (keys['w'] && game.paddle.y > 0) {
+        game.paddle.y -= game.paddle.speed;
+        paddle.set('top', game.paddle.y);
+      }
+      if (keys['s'] && game.paddle.y < canvas.height - game.paddle.height) {
+        game.paddle.y += game.paddle.speed;
+        paddle.set('top', game.paddle.y);
+      }
+
+      // Move ball
+      game.ball.x += game.ball.speedX;
+      game.ball.y += game.ball.speedY;
+
+      // Ball collision with walls
+      if (game.ball.y <= game.ball.radius || game.ball.y >= canvas.height - game.ball.radius) {
+        game.ball.speedY = -game.ball.speedY;
+      }
+
+      // Ball collision with right wall (bounce back)
+      if (game.ball.x >= canvas.width - game.ball.radius) {
+        game.ball.speedX = -game.ball.speedX;
+      }
+
+      // Ball collision with paddle
+      if (game.ball.x - game.ball.radius <= game.paddle.x + game.paddle.width &&
+          game.ball.y >= game.paddle.y &&
+          game.ball.y <= game.paddle.y + game.paddle.height &&
+          game.ball.speedX < 0) {
+        game.ball.speedX = -game.ball.speedX;
+        game.score += 10;
+        scoreText.set('text', `Score: ${game.score}`);
+      }
+
+      // Ball goes off left side (game over)
+      if (game.ball.x < -game.ball.radius) {
+        // Reset ball
+        game.ball.x = canvas.width / 2;
+        game.ball.y = canvas.height / 2;
+        game.ball.speedX = Math.abs(game.ball.speedX);
+        game.score = Math.max(0, game.score - 50);
+        scoreText.set('text', `Score: ${game.score}`);
+      }
+
+      // Update ball position (adjust for Fabric.js coordinates)
+      ball.set({
+        left: game.ball.x - game.ball.radius,
+        top: game.ball.y - game.ball.radius
+      });
+
+      canvas.renderAll();
+    }, 1000 / 60); // 60 FPS
+
+    // Cleanup function when switching examples
+    this.gameCleanup = () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
+    };
+  }
+
+  setupAnimationDemo() {
+    const canvas = this.canvas.canvas;
+    
+    // Create animated elements
+    const elements = [];
+    
+    // Add title
+    const titleText = new fabric.Text('Animation Demo', {
+      left: canvas.width / 2,
+      top: 50,
+      originX: 'center',
+      fontSize: 32,
+      fill: '#333',
+      selectable: false
+    });
+    canvas.add(titleText);
+
+    // Create floating circles
+    for (let i = 0; i < 8; i++) {
+      const circle = new fabric.Circle({
+        left: Math.random() * canvas.width,
+        top: Math.random() * canvas.height + 100,
+        radius: 20 + Math.random() * 30,
+        fill: `hsl(${Math.random() * 360}, 70%, 60%)`,
+        selectable: false
+      });
+      
+      // Add animation properties
+      circle.animProps = {
+        speedX: (Math.random() - 0.5) * 4,
+        speedY: (Math.random() - 0.5) * 4,
+        rotationSpeed: (Math.random() - 0.5) * 0.1,
+        scaleDirection: 1,
+        scaleSpeed: 0.01 + Math.random() * 0.02
+      };
+      
+      canvas.add(circle);
+      elements.push(circle);
+    }
+
+    // Create rotating squares
+    for (let i = 0; i < 5; i++) {
+      const rect = new fabric.Rect({
+        left: Math.random() * canvas.width,
+        top: Math.random() * canvas.height + 100,
+        width: 30 + Math.random() * 40,
+        height: 30 + Math.random() * 40,
+        fill: `hsl(${Math.random() * 360}, 80%, 50%)`,
+        selectable: false,
+        angle: Math.random() * 360
+      });
+      
+      rect.animProps = {
+        rotationSpeed: (Math.random() - 0.5) * 5,
+        orbitRadius: 50 + Math.random() * 100,
+        orbitSpeed: 0.02 + Math.random() * 0.03,
+        orbitAngle: Math.random() * Math.PI * 2,
+        centerX: rect.left,
+        centerY: rect.top
+      };
+      
+      canvas.add(rect);
+      elements.push(rect);
+    }
+
+    // Animation loop
+    const animate = () => {
+      elements.forEach(element => {
+        const props = element.animProps;
+        
+        if (element instanceof fabric.Circle) {
+          // Move circles
+          let newLeft = element.left + props.speedX;
+          let newTop = element.top + props.speedY;
+          
+          // Bounce off walls
+          if (newLeft <= element.radius || newLeft >= canvas.width - element.radius) {
+            props.speedX = -props.speedX;
+            newLeft = element.left + props.speedX;
+          }
+          if (newTop <= element.radius || newTop >= canvas.height - element.radius) {
+            props.speedY = -props.speedY;
+            newTop = element.top + props.speedY;
+          }
+          
+          element.set({
+            left: newLeft,
+            top: newTop,
+            angle: element.angle + props.rotationSpeed
+          });
+
+          // Pulsing scale effect
+          const currentScale = element.scaleX || 1;
+          const newScale = currentScale + (props.scaleSpeed * props.scaleDirection);
+          
+          if (newScale > 1.3 || newScale < 0.7) {
+            props.scaleDirection = -props.scaleDirection;
+          }
+          
+          element.set({
+            scaleX: newScale,
+            scaleY: newScale
+          });
+          
+        } else if (element instanceof fabric.Rect) {
+          // Rotate squares
+          element.set('angle', element.angle + props.rotationSpeed);
+          
+          // Orbital movement
+          props.orbitAngle += props.orbitSpeed;
+          const newLeft = props.centerX + Math.cos(props.orbitAngle) * props.orbitRadius;
+          const newTop = props.centerY + Math.sin(props.orbitAngle) * props.orbitRadius;
+          
+          element.set({
+            left: newLeft,
+            top: newTop
+          });
+        }
+      });
+      
+      canvas.renderAll();
+      
+      if (this.currentExample === 'animation') {
+        this.animationFrame = requestAnimationFrame(animate);
+      }
+    };
+    
+    // Start animation
+    animate();
   }
 }
 

@@ -1,0 +1,7 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Use Context7 to get latest library documantations
+- Use Playwright tool to check if it's ok or not
