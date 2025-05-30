@@ -1,3 +1,4 @@
+import * as fabric from 'fabric';
 import { Canvas } from './core/Canvas.js';
 import { FabricLayerManager } from './layers/FabricLayerManager.js';
 import { Brush } from './tools/Brush.js';
@@ -624,7 +625,7 @@ class CanvasApp {
     };
 
     // Add instructions text
-    const instructionsText = new fabric.Text('Use W/S keys to move paddle\nKeep the ball in play!', {
+    const instructionsText = new fabric.Text('Use W/S (Ц/Ы) keys to move paddle\nKeep the ball in play!', {
       left: canvas.width / 2,
       top: 50,
       originX: 'center',
@@ -676,10 +677,12 @@ class CanvasApp {
     const keys = {};
     
     const handleKeyDown = (e) => {
+      console.log('Game Key Down:', e.key.toLowerCase()); // Отладка
       keys[e.key.toLowerCase()] = true;
     };
     
     const handleKeyUp = (e) => {
+      console.log('Game Key Up:', e.key.toLowerCase()); // Отладка
       keys[e.key.toLowerCase()] = false;
     };
 
@@ -690,12 +693,14 @@ class CanvasApp {
     this.gameLoop = setInterval(() => {
       if (!game.isRunning) return;
 
-      // Move paddle
-      if (keys['w'] && game.paddle.y > 0) {
+      // Move paddle (support both English and Russian keys)
+      if ((keys['w'] || keys['ц']) && game.paddle.y > 0) {
+        console.log('Moving paddle up'); // Отладка
         game.paddle.y -= game.paddle.speed;
         paddle.set('top', game.paddle.y);
       }
-      if (keys['s'] && game.paddle.y < canvas.height - game.paddle.height) {
+      if ((keys['s'] || keys['ы']) && game.paddle.y < canvas.height - game.paddle.height) {
+        console.log('Moving paddle down'); // Отладка
         game.paddle.y += game.paddle.speed;
         paddle.set('top', game.paddle.y);
       }
