@@ -677,12 +677,10 @@ class CanvasApp {
     const keys = {};
     
     const handleKeyDown = (e) => {
-      console.log('Game Key Down:', e.key.toLowerCase()); // Отладка
       keys[e.key.toLowerCase()] = true;
     };
     
     const handleKeyUp = (e) => {
-      console.log('Game Key Up:', e.key.toLowerCase()); // Отладка
       keys[e.key.toLowerCase()] = false;
     };
 
@@ -695,12 +693,10 @@ class CanvasApp {
 
       // Move paddle (support both English and Russian keys)
       if ((keys['w'] || keys['ц']) && game.paddle.y > 0) {
-        console.log('Moving paddle up'); // Отладка
         game.paddle.y -= game.paddle.speed;
         paddle.set('top', game.paddle.y);
       }
       if ((keys['s'] || keys['ы']) && game.paddle.y < canvas.height - game.paddle.height) {
-        console.log('Moving paddle down'); // Отладка
         game.paddle.y += game.paddle.speed;
         paddle.set('top', game.paddle.y);
       }

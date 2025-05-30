@@ -2,24 +2,30 @@
 
 A comprehensive and modular 2D canvas template for creating browser-based graphics applications, animations, and games. Perfect for building applications like Miro, Excalidraw, Paint, Photoshop, Canva, and more.
 
+Built on top of **Fabric.js** - a powerful library for working with HTML5 Canvas.
+
 ## ✨ Features
 
-- **🎯 Core Canvas Engine**: Optimized rendering loop with requestAnimationFrame
+- **🎯 Fabric.js Core**: Uses Fabric.js for optimized canvas operations
 - **🖱️ Input Handling**: Mouse, keyboard, and touch support
-- **🎨 Drawing Tools**: Brush, pen, shapes, text, and custom tools
-- **📚 Layer Management**: Multiple layers with blending modes
-- **🎭 Animation System**: Tweening, easing, and timeline animations
-- **🔧 Plugin Architecture**: Extensible plugin system
-- **📱 Responsive Design**: Works on desktop, tablet, and mobile
+- **🎨 Drawing Tools**: Brush, pen, shapes, text, eraser, selection
+- **📚 Layer Management**: Multi-layer support with management capabilities
+- **🎭 Animation System**: Smooth object animations
+- **🎮 Game Features**: Simple game with physics and controls
+- **🌐 Keyboard Layout Support**: Works with both English and Russian keyboard layouts
+- **📱 Responsive Design**: Works on desktop, tablet, and mobile devices
 - **⚡ Performance Optimized**: Efficient rendering and memory management
-- **🎮 Game Ready**: Collision detection, sprite management, physics
-- **🎪 Examples Included**: Drawing app, simple game, animation demos
+- **🔧 Modular Architecture**: Extensible component system
 
 ## 🚀 Quick Start
 
-### Option 1: Development Server (Recommended)
+### Install Dependencies
 ```bash
 npm install
+```
+
+### Option 1: Development Server (Recommended)
+```bash
 npm run dev
 ```
 
@@ -35,30 +41,58 @@ Then open your browser to `http://localhost:8000` (or the port shown in terminal
 ```
 canvas-template/
 ├── src/
-│   ├── core/              # Core canvas engine
-│   │   ├── Canvas.js      # Main canvas class
-│   │   ├── Renderer.js    # Rendering engine
-│   │   ├── InputManager.js # Input handling
+│   ├── core/              # Core application engine
+│   │   ├── Canvas.js      # Main canvas class (Fabric.js wrapper)
 │   │   └── AnimationLoop.js # Animation loop
 │   ├── tools/             # Drawing tools
-│   │   ├── Brush.js       # Brush tool
-│   │   ├── Shape.js       # Shape tools
-│   │   └── Text.js        # Text tool
+│   │   ├── Brush.js       # Brush/pen/eraser tool
+│   │   ├── SelectTool.js  # Selection tool
+│   │   ├── ShapeTool.js   # Shape tools
+│   │   └── TextTool.js    # Text tool
 │   ├── layers/            # Layer management
-│   ├── animations/        # Animation system
-│   ├── plugins/           # Plugin system
-│   └── utils/             # Utility functions
-├── examples/              # Example applications
-│   ├── drawing-app/       # Drawing application
-│   ├── simple-game/       # Simple game
-│   └── animation-demo/    # Animation examples
-├── assets/                # Static assets
-└── docs/                  # Documentation
+│   │   └── FabricLayerManager.js # Fabric.js layer manager
+│   ├── utils/             # Utilities
+│   │   └── EventEmitter.js # Event system
+│   └── main.js            # Main application file
+├── styles/                # CSS styles
+│   └── main.css          # Main styles
+├── index.html            # Main page
+├── package.json          # Dependencies and scripts
+└── README.md            # Documentation
 ```
 
 ## 🎯 Usage Examples
 
-### Basic Canvas Setup
+### 1. 🎨 Drawing Application (Drawing App)
+Full-featured drawing application with tools:
+- **Brush and Pen**: Various sizes and opacity
+- **Shapes**: Rectangles, circles, lines
+- **Text**: Adding text elements
+- **Eraser**: Removing parts of the image
+- **Selection**: Moving and transforming objects
+- **Colors**: Color palette and swatches
+- **Layers**: Image layer management
+- **Export**: Save to PNG format
+
+### 2. 🎮 Simple Game (Simple Game)
+Pong-style game with features:
+- **Controls**: W/S keys (Ц/Ы for Russian layout) to move paddle
+- **Physics**: Ball bouncing off walls and paddle
+- **Score**: Scoring system
+- **Reset**: Automatic reset on game over
+- **60 FPS**: Smooth game loop
+
+### 3. 🎭 Animation Demo (Animation Demo)
+Demonstration of animation capabilities:
+- **Floating Circles**: Movement with wall bouncing
+- **Rotating Squares**: Orbital movement
+- **Scaling**: Pulsing effects
+- **Color Effects**: HSL color animation
+
+## 🔧 Core Classes
+
+### Canvas (src/core/Canvas.js)
+Main wrapper class over Fabric.js:
 ```javascript
 import { Canvas } from './src/core/Canvas.js';
 
@@ -79,137 +113,113 @@ import { Brush } from './src/tools/Brush.js';
 const brush = new Brush({
   size: 5,
   color: '#000000',
-  opacity: 1.0
+  opacity: 1.0,
+  type: 'pencil' // 'pencil' | 'eraser'
 });
 
 canvas.setTool(brush);
 ```
 
-### Animations
+### Layer Management
 ```javascript
-import { Animation } from './src/animations/Animation.js';
+import { FabricLayerManager } from './src/layers/FabricLayerManager.js';
 
-const animation = new Animation({
-  duration: 1000,
-  easing: 'easeInOut',
-  onUpdate: (progress) => {
-    // Animation logic
-  }
-});
-
-canvas.addAnimation(animation);
+const layerManager = new FabricLayerManager(canvas);
+layerManager.addLayer();
+layerManager.bringToFront();
 ```
 
-## 🔧 Configuration
+## ⌨️ Keyboard Shortcuts
 
-The template is highly configurable. See `src/core/Config.js` for all available options:
+### General
+- **B** - Brush
+- **V** - Selection  
+- **R** - Rectangle
+- **C** - Circle
+- **T** - Text
+- **E** - Eraser
+- **Ctrl/Cmd + S** - Export
+- **Ctrl/Cmd + A** - Select All
+- **Delete/Backspace** - Delete Selected
 
-```javascript
-const config = {
-  canvas: {
-    width: 800,
-    height: 600,
-    backgroundColor: '#ffffff',
-    pixelRatio: window.devicePixelRatio || 1
-  },
-  performance: {
-    maxFPS: 60,
-    enableVSync: true,
-    optimizeOffscreen: true
-  },
-  input: {
-    enableMouse: true,
-    enableTouch: true,
-    enableKeyboard: true
-  }
-};
-```
+### Game
+- **W/Ц** - Move paddle up
+- **S/Ы** - Move paddle down
 
-## 🎮 Examples
+### Navigation
+- **Alt + Drag** - Pan
+- **Mouse Wheel** - Zoom
 
-### 1. Drawing Application
-A complete drawing app with brushes, shapes, layers, and export functionality.
-- Location: `examples/drawing-app/`
-- Features: Multiple tools, color picker, layer management
+## 🎨 Configuration and Customization
 
-### 2. Simple Game
-A basic 2D game demonstrating sprites, collision detection, and game loop.
-- Location: `examples/simple-game/`
-- Features: Player movement, collision detection, scoring
-
-### 3. Animation Demo
-Various animation examples showing the animation system capabilities.
-- Location: `examples/animation-demo/`
-- Features: Tweening, easing functions, timeline animations
-
-## 🔌 Plugin System
-
-Create custom plugins to extend functionality:
-
-```javascript
-class CustomTool {
-  constructor(options) {
-    this.name = 'custom-tool';
-    this.options = options;
-  }
-
-  onMouseDown(event) {
-    // Tool logic
-  }
-
-  onMouseMove(event) {
-    // Tool logic
-  }
-
-  onMouseUp(event) {
-    // Tool logic
-  }
-}
-
-canvas.registerPlugin(new CustomTool());
-```
-
-## 📱 Mobile Support
-
-The template includes full touch support and responsive design:
-
-- Touch gestures for drawing and navigation
-- Responsive canvas sizing
-- Mobile-optimized UI components
-- Performance optimizations for mobile devices
-
-## 🎨 Customization
-
-### Themes
-Customize the appearance with CSS variables:
-
+### Color Scheme
+Customize appearance through CSS variables in `styles/main.css`:
 ```css
 :root {
   --primary-color: #007bff;
   --secondary-color: #6c757d;
   --background-color: #ffffff;
   --text-color: #333333;
+  --border-color: #dee2e6;
 }
 ```
 
-### Tools
-Add custom drawing tools by extending the base Tool class:
-
+### Adding New Tools
+Create a new tool by extending the base class:
 ```javascript
-import { Tool } from './src/tools/Tool.js';
-
-class MyCustomTool extends Tool {
-  // Implement your tool logic
+class MyTool {
+  activate(canvas) {
+    // Tool activation logic
+  }
+  
+  deactivate() {
+    // Tool deactivation logic
+  }
 }
 ```
+
+## 🔧 Dependencies
+
+### Main
+- **Fabric.js ^6.0.0** - Canvas library
+- **Vite ^5.0.0** - Build tool (dev)
+
+### Fabric.js Features
+- Interactive objects
+- JSON/SVG serialization
+- Image filters and effects
+- Object grouping
+- Transformations and animations
+
+## 📱 Mobile Support
+
+The template includes full touch device support:
+- Touch gestures for drawing
+- Responsive canvas sizing
+- Mobile-optimized UI components
+- Performance optimizations for mobile devices
 
 ## 🚀 Performance Tips
 
 1. **Use layers wisely**: Separate static and dynamic content
-2. **Optimize drawing calls**: Batch similar operations
-3. **Enable offscreen rendering**: For complex static elements
-4. **Use requestAnimationFrame**: For smooth animations
-5. **Implement viewport culling**: Only render visible elements
+2. **Optimize rendering calls**: Group similar operations
+3. **Use requestAnimationFrame**: For smooth animations
+4. **Configure object caching**: `fabric.Object.prototype.objectCaching = true`
+5. **Limit object count**: Remove unnecessary elements
+
+## 🛠️ Development
+
+### Code Structure
+- ES6+ modules
+- Event system
+- Modular architecture
+- Separation of concerns
+
+### Adding New Examples
+1. Create a new function in `CanvasApp`
+2. Add button to navigation
+3. Register handler in `setupUI()`
+4. Implement switching logic in `switchExample()`
 
 ## 🤝 Contributing
 
@@ -217,14 +227,14 @@ class MyCustomTool extends Tool {
 2. Create a feature branch
 3. Make your changes
 4. Add tests if applicable
-5. Submit a pull request
+5. Create a pull request
 
 ## 📄 License
 
-MIT License - feel free to use this template for any project!
+MIT License - use this template for any projects!
 
 ## 🙏 Acknowledgments
 
-- Inspired by popular graphics applications like Miro, Excalidraw, and Canva
-- Built with modern web standards and best practices
-- Optimized for performance and extensibility 
+- **Fabric.js** - for the powerful canvas library
+- Inspired by popular graphics applications
+- Built with modern web standards 
