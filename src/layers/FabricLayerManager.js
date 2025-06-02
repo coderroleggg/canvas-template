@@ -24,6 +24,25 @@ export class FabricLayerManager {
     this.fabricCanvas.on('object:removed', (e) => {
       this.handleObjectRemoved(e.target);
     });
+
+    // Listen for object selection events
+    this.fabricCanvas.on('selection:created', (e) => {
+      this.handleObjectSelected(e.selected[0]);
+    });
+
+    this.fabricCanvas.on('selection:updated', (e) => {
+      this.handleObjectSelected(e.selected[0]);
+    });
+  }
+
+  handleObjectSelected(object) {
+    if (!object || !object.layerId) return;
+    
+    // Find which layer this object belongs to
+    const layerIndex = this.layers.findIndex(layer => layer.id === object.layerId);
+    if (layerIndex !== -1 && layerIndex !== this.activeLayerIndex) {
+      this.setActiveLayer(layerIndex);
+    }
   }
 
   handleObjectAdded(object) {
@@ -32,6 +51,8 @@ export class FabricLayerManager {
       const activeLayer = this.getActiveLayer();
       if (activeLayer) {
         activeLayer.addObject(object);
+        // Ensure the object is positioned correctly according to layer order
+        this.rearrangeCanvasObjects();
       }
     }
   }
@@ -101,8 +122,28 @@ export class FabricLayerManager {
     if (index >= 0 && index < this.layers.length) {
       this.activeLayerIndex = index;
       this.updateUI();
+      
+      // Update visual indicators for debugging
+      this.updateLayerIndicators();
+      
       this.canvas.emit('activeLayerChanged', { layer: this.getActiveLayer(), index });
     }
+  }
+
+  // Update visual indicators showing which layer each object belongs to
+  updateLayerIndicators() {
+    this.fabricCanvas.getObjects().forEach(obj => {
+      // Remove any existing layer indicator
+      if (obj.layerIndicator) {
+        delete obj.layerIndicator;
+      }
+      
+      // Find which layer this object belongs to
+      const layerIndex = this.layers.findIndex(layer => layer.objects.includes(obj));
+      if (layerIndex !== -1) {
+        obj.layerIndicator = `Layer ${layerIndex + 1}: ${this.layers[layerIndex].name}`;
+      }
+    });
   }
 
   setLayerVisibility(index, visible) {
@@ -142,10 +183,36 @@ export class FabricLayerManager {
       this.activeLayerIndex++;
     }
     
+    // Rearrange objects on canvas according to new layer order
+    this.rearrangeCanvasObjects();
+    
     this.updateUI();
     this.canvas.emit('layerMoved', { layer, fromIndex, toIndex });
     
     return true;
+  }
+
+  // Rearrange all canvas objects according to layer order
+  rearrangeCanvasObjects() {
+    const allObjects = [];
+    
+    // Collect all objects in layer order (bottom to top)
+    this.layers.forEach(layer => {
+      layer.objects.forEach(obj => {
+        allObjects.push(obj);
+      });
+    });
+    
+    // Clear canvas objects array without triggering events
+    this.fabricCanvas._objects.length = 0;
+    
+    // Add objects back in the correct order
+    allObjects.forEach(obj => {
+      this.fabricCanvas._objects.push(obj);
+    });
+    
+    // Trigger a complete re-render of the canvas
+    this.fabricCanvas.requestRenderAll();
   }
 
   duplicateLayer(index) {
@@ -172,6 +239,20 @@ export class FabricLayerManager {
   // Move active layer to front (top)
   bringToFront() {
     const activeIndex = this.activeLayerIndex;
+    const activeLayer = this.getActiveLayer();
+    
+    // If there's a selected object, move just that object
+    const selectedObject = this.fabricCanvas.getActiveObject();
+    if (selectedObject && activeLayer && activeLayer.objects.includes(selectedObject)) {
+      // Move the object to the top of its layer
+      const objIndex = activeLayer.objects.indexOf(selectedObject);
+      activeLayer.objects.splice(objIndex, 1);
+      activeLayer.objects.push(selectedObject);
+      this.rearrangeCanvasObjects();
+      return true;
+    }
+    
+    // Otherwise, move the entire layer
     if (activeIndex < this.layers.length - 1) {
       return this.moveLayer(activeIndex, this.layers.length - 1);
     }
@@ -181,6 +262,22 @@ export class FabricLayerManager {
   // Move active layer forward (up one position)
   bringForward() {
     const activeIndex = this.activeLayerIndex;
+    const activeLayer = this.getActiveLayer();
+    
+    // If there's a selected object, move just that object
+    const selectedObject = this.fabricCanvas.getActiveObject();
+    if (selectedObject && activeLayer && activeLayer.objects.includes(selectedObject)) {
+      // Move the object up within its layer
+      const objIndex = activeLayer.objects.indexOf(selectedObject);
+      if (objIndex < activeLayer.objects.length - 1) {
+        activeLayer.objects.splice(objIndex, 1);
+        activeLayer.objects.splice(objIndex + 1, 0, selectedObject);
+        this.rearrangeCanvasObjects();
+        return true;
+      }
+    }
+    
+    // Otherwise, move the entire layer
     if (activeIndex < this.layers.length - 1) {
       return this.moveLayer(activeIndex, activeIndex + 1);
     }
@@ -190,6 +287,22 @@ export class FabricLayerManager {
   // Move active layer backward (down one position)
   sendBackward() {
     const activeIndex = this.activeLayerIndex;
+    const activeLayer = this.getActiveLayer();
+    
+    // If there's a selected object, move just that object
+    const selectedObject = this.fabricCanvas.getActiveObject();
+    if (selectedObject && activeLayer && activeLayer.objects.includes(selectedObject)) {
+      // Move the object down within its layer
+      const objIndex = activeLayer.objects.indexOf(selectedObject);
+      if (objIndex > 0) {
+        activeLayer.objects.splice(objIndex, 1);
+        activeLayer.objects.splice(objIndex - 1, 0, selectedObject);
+        this.rearrangeCanvasObjects();
+        return true;
+      }
+    }
+    
+    // Otherwise, move the entire layer
     if (activeIndex > 0) {
       return this.moveLayer(activeIndex, activeIndex - 1);
     }
@@ -199,6 +312,20 @@ export class FabricLayerManager {
   // Move active layer to back (bottom)
   sendToBack() {
     const activeIndex = this.activeLayerIndex;
+    const activeLayer = this.getActiveLayer();
+    
+    // If there's a selected object, move just that object
+    const selectedObject = this.fabricCanvas.getActiveObject();
+    if (selectedObject && activeLayer && activeLayer.objects.includes(selectedObject)) {
+      // Move the object to the bottom of its layer
+      const objIndex = activeLayer.objects.indexOf(selectedObject);
+      activeLayer.objects.splice(objIndex, 1);
+      activeLayer.objects.unshift(selectedObject);
+      this.rearrangeCanvasObjects();
+      return true;
+    }
+    
+    // Otherwise, move the entire layer
     if (activeIndex > 0) {
       return this.moveLayer(activeIndex, 0);
     }
