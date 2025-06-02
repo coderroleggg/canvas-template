@@ -4,4 +4,5 @@ globs:
 alwaysApply: true
 ---
 - Use Context7 to get latest library documantations
+- Check every new method, param or class you add in context7 docs for fabric.js library
 - Use Playwright tool to check if it's ok or not

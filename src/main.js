@@ -753,12 +753,14 @@ class CanvasApp {
 
   setupAnimationDemo() {
     const canvas = this.canvas.canvas;
+    const canvasWrapper = this.canvas; // Store reference to Canvas wrapper
     
     // Create animated elements
     const elements = [];
+    const particles = []; // For particle trails
     
     // Add title
-    const titleText = new fabric.Text('Animation Demo', {
+    const titleText = new fabric.Text('Animation Demo with Spaceship', {
       left: canvas.width / 2,
       top: 50,
       originX: 'center',
@@ -767,6 +769,182 @@ class CanvasApp {
       selectable: false
     });
     canvas.add(titleText);
+
+    // Add subtitle with instructions
+    const subtitleText = new fabric.Text('Watch the spaceships fly with different patterns!', {
+      left: canvas.width / 2,
+      top: 85,
+      originX: 'center',
+      fontSize: 16,
+      fill: '#666',
+      selectable: false
+    });
+    canvas.add(subtitleText);
+
+    // Load and add multiple spaceships with different behaviors
+    const spaceshipBehaviors = [
+      {
+        // Main spaceship - circular orbit
+        scale: 0.12,
+        animProps: {
+          type: 'orbit',
+          orbitRadius: 150,
+          orbitSpeed: 0.02,
+          orbitAngle: 0,
+          centerX: canvas.width / 2,
+          centerY: canvas.height / 2,
+          scaleDirection: 1,
+          scaleSpeed: 0.002
+        }
+      },
+      {
+        // Patrol spaceship - horizontal movement
+        scale: 0.08,
+        animProps: {
+          type: 'patrol',
+          startX: 100,
+          endX: canvas.width - 100,
+          y: canvas.height * 0.3,
+          speed: 2,
+          direction: 1
+        }
+      },
+      {
+        // Explorer spaceship - figure-8 pattern
+        scale: 0.1,
+        animProps: {
+          type: 'figure8',
+          centerX: canvas.width / 2,
+          centerY: canvas.height / 2,
+          radiusX: 200,
+          radiusY: 100,
+          speed: 0.015,
+          angle: 0
+        }
+      },
+      {
+        // Scout spaceship - random wandering
+        scale: 0.07,
+        animProps: {
+          type: 'wander',
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          targetX: Math.random() * canvas.width,
+          targetY: Math.random() * canvas.height,
+          speed: 1.5
+        }
+      }
+    ];
+
+    // Load spaceship image using native Image first
+    console.log('Attempting to load spaceship image from: assets/spaceship.png');
+    const imgElement = new Image();
+    
+    imgElement.onload = function() {
+      console.log('Native image loaded successfully:', imgElement.width, 'x', imgElement.height);
+      
+      // Now create fabric image from the loaded image element
+      const originalSpaceship = new fabric.Image(imgElement);
+      
+      // Create multiple spaceships from the loaded image
+      spaceshipBehaviors.forEach((behavior, index) => {
+        // Clone the original spaceship
+        const spaceship = new fabric.Image(imgElement);
+        console.log(`Creating spaceship ${index + 1} with behavior: ${behavior.animProps.type}`);
+        
+        spaceship.scale(behavior.scale);
+        
+        // Set initial position based on behavior type
+        let initialX = canvas.width / 2;
+        let initialY = canvas.height / 2;
+        
+        if (behavior.animProps.type === 'patrol') {
+          initialX = behavior.animProps.startX;
+          initialY = behavior.animProps.y;
+        } else if (behavior.animProps.type === 'wander') {
+          initialX = behavior.animProps.x;
+          initialY = behavior.animProps.y;
+        }
+        
+        spaceship.set({
+          left: initialX,
+          top: initialY,
+          originX: 'center',
+          originY: 'center',
+          selectable: false,
+          opacity: 0.9
+        });
+        
+        // Copy animation properties and add base scale
+        spaceship.animProps = {
+          ...behavior.animProps,
+          baseScale: behavior.scale
+        };
+        
+        canvas.add(spaceship);
+        elements.push(spaceship);
+      });
+      
+      canvas.requestRenderAll();
+    };
+    
+    imgElement.onerror = function(err) {
+      console.error('Error loading spaceship image:', err);
+      console.error('Failed URL:', imgElement.src);
+      createFallbackSpaceships();
+    };
+    
+    // Set the image source
+    imgElement.crossOrigin = 'anonymous';
+    imgElement.src = 'assets/spaceship.png';
+
+    // Fallback function to create triangle spaceships if image fails
+    function createFallbackSpaceships() {
+      console.log('Creating fallback triangle spaceships');
+      spaceshipBehaviors.forEach((behavior, index) => {
+        // Create triangle as spaceship
+        const spaceship = new fabric.Triangle({
+          width: 40,
+          height: 50,
+          fill: '#4169E1',
+          stroke: '#87CEEB',
+          strokeWidth: 2
+        });
+        
+        spaceship.scale(behavior.scale * 2); // Scale up triangles
+        
+        // Set initial position based on behavior type
+        let initialX = canvas.width / 2;
+        let initialY = canvas.height / 2;
+        
+        if (behavior.animProps.type === 'patrol') {
+          initialX = behavior.animProps.startX;
+          initialY = behavior.animProps.y;
+        } else if (behavior.animProps.type === 'wander') {
+          initialX = behavior.animProps.x;
+          initialY = behavior.animProps.y;
+        }
+        
+        spaceship.set({
+          left: initialX,
+          top: initialY,
+          originX: 'center',
+          originY: 'center',
+          selectable: false,
+          opacity: 0.9
+        });
+        
+        // Copy animation properties and add base scale
+        spaceship.animProps = {
+          ...behavior.animProps,
+          baseScale: behavior.scale * 2
+        };
+        
+        canvas.add(spaceship);
+        elements.push(spaceship);
+      });
+      canvas.requestRenderAll();
+    }
 
     // Create floating circles
     for (let i = 0; i < 8; i++) {
@@ -816,12 +994,166 @@ class CanvasApp {
       elements.push(rect);
     }
 
+    // Function to create particle trail
+    const createParticle = (x, y, color) => {
+      const particle = new fabric.Circle({
+        left: x,
+        top: y,
+        radius: Math.random() * 3 + 1,
+        fill: color || '#87CEEB',
+        opacity: 0.8,
+        selectable: false
+      });
+      
+      particle.lifespan = 30; // frames
+      particle.fadeSpeed = 0.025;
+      
+      canvas.add(particle);
+      particles.push(particle);
+      
+      // Send particle to back using Fabric.js native method
+      // Temporarily disabled to test
+      // canvas.sendToBack(particle);
+    };
+
     // Animation loop
+    let frameCount = 0;
     const animate = () => {
+      frameCount++;
+      if (frameCount % 60 === 0) {
+        console.log('Animation running, frame:', frameCount);
+      }
+      // Update and clean up particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const particle = particles[i];
+        particle.lifespan--;
+        particle.set('opacity', particle.opacity - particle.fadeSpeed);
+        particle.set('radius', particle.radius * 0.95);
+        
+        if (particle.lifespan <= 0 || particle.opacity <= 0) {
+          canvas.remove(particle);
+          particles.splice(i, 1);
+        }
+      }
+      
       elements.forEach(element => {
         const props = element.animProps;
         
-        if (element instanceof fabric.Circle) {
+        if (element instanceof fabric.Image || element instanceof fabric.Triangle) {
+          // Store previous position for particle trail
+          const prevX = element.left;
+          const prevY = element.top;
+          // Spaceship animations based on type (works for both images and triangles)
+          switch (props.type) {
+            case 'orbit':
+              // Circular orbit animation
+              props.orbitAngle += props.orbitSpeed;
+              const orbitX = props.centerX + Math.cos(props.orbitAngle) * props.orbitRadius;
+              const orbitY = props.centerY + Math.sin(props.orbitAngle) * props.orbitRadius;
+              
+              // Point spaceship in direction of movement
+              const orbitAngle = (props.orbitAngle * 180 / Math.PI) + 90;
+              
+              element.set({
+                left: orbitX,
+                top: orbitY,
+                angle: orbitAngle
+              });
+
+              // Pulsing scale effect
+              const currentScale = element.scaleX;
+              const newScale = currentScale + (props.scaleSpeed * props.scaleDirection);
+              
+              if (newScale > props.baseScale * 1.2 || newScale < props.baseScale * 0.8) {
+                props.scaleDirection = -props.scaleDirection;
+              }
+              
+              element.set({
+                scaleX: newScale,
+                scaleY: newScale
+              });
+              
+              // Create particle trail with blue color
+              if (Math.random() < 0.3) {
+                createParticle(prevX, prevY, '#4169E1');
+              }
+              break;
+              
+            case 'patrol':
+              // Horizontal patrol movement
+              const currentX = element.left;
+              const newX = currentX + (props.speed * props.direction);
+              
+              // Reverse direction at boundaries
+              if (newX >= props.endX || newX <= props.startX) {
+                props.direction = -props.direction;
+                element.set('angle', props.direction > 0 ? 90 : -90);
+              }
+              
+              element.set({
+                left: newX,
+                top: props.y
+              });
+              
+              // Create particle trail with orange color
+              if (Math.random() < 0.4) {
+                createParticle(prevX, prevY, '#FF6347');
+              }
+              break;
+              
+            case 'figure8':
+              // Figure-8 pattern
+              props.angle += props.speed;
+              const fig8X = props.centerX + Math.sin(props.angle) * props.radiusX;
+              const fig8Y = props.centerY + Math.sin(props.angle * 2) * props.radiusY;
+              
+              // Calculate direction angle
+              const prevFig8X = props.centerX + Math.sin(props.angle - 0.1) * props.radiusX;
+              const prevFig8Y = props.centerY + Math.sin((props.angle - 0.1) * 2) * props.radiusY;
+              const dirAngle = Math.atan2(fig8Y - prevFig8Y, fig8X - prevFig8X) * 180 / Math.PI + 90;
+              
+              element.set({
+                left: fig8X,
+                top: fig8Y,
+                angle: dirAngle
+              });
+              
+              // Create particle trail with purple color
+              if (Math.random() < 0.5) {
+                createParticle(prevX, prevY, '#9370DB');
+              }
+              break;
+              
+            case 'wander':
+              // Random wandering movement
+              const dx = props.targetX - element.left;
+              const dy = props.targetY - element.top;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              
+              if (distance < 10) {
+                // Reached target, pick new random target
+                props.targetX = 50 + Math.random() * (canvas.width - 100);
+                props.targetY = 150 + Math.random() * (canvas.height - 200);
+              } else {
+                // Move towards target
+                const moveX = (dx / distance) * props.speed;
+                const moveY = (dy / distance) * props.speed;
+                
+                element.set({
+                  left: element.left + moveX,
+                  top: element.top + moveY,
+                  angle: Math.atan2(dy, dx) * 180 / Math.PI + 90
+                });
+                
+                // Create particle trail with green color
+                if (Math.random() < 0.3) {
+                  createParticle(prevX, prevY, '#32CD32');
+                }
+              }
+              break;
+          }
+          
+        } else if (element instanceof fabric.Circle) {
           // Move circles
           let newLeft = element.left + props.speedX;
           let newTop = element.top + props.speedY;
@@ -876,9 +1208,10 @@ class CanvasApp {
       if (this.currentExample === 'animation') {
         this.animationFrame = requestAnimationFrame(animate);
       }
-    };
+    }; // Animation loop end
     
     // Start animation
+    console.log('Starting animation demo');
     animate();
   }
 }
